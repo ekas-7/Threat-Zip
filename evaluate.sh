@@ -36,14 +36,14 @@ run_evaluation() {
     echo "🚀 Starting IDS Evaluation - $TIMESTAMP"
     
     # Check if lab is running
-    if ! docker ps | grep -q "ids\|snort-ids"; then
+    if ! docker ps | grep -q "ids"; then
         echo "❌ IDS container not running. Please start the lab first."
         exit 1
     fi
     
     # Clear previous logs
     echo "🧹 Clearing previous logs..."
-    docker exec ids rm -f /var/log/suricata/* 2>/dev/null || true
+    docker exec ids rm -f /var/log/snort/* 2>/dev/null || true
     
     # Wait for IDS to stabilize
     echo "⏳ Waiting for IDS to stabilize..."
@@ -60,7 +60,7 @@ run_evaluation() {
         start_time=$(date +%s)
         
         # Clear alerts before test
-        docker exec ids truncate -s 0 /var/log/suricata/fast.log 2>/dev/null || true
+        docker exec ids truncate -s 0 /var/log/snort/alerts.txt 2>/dev/null || true
         
         # Run the specific test
         case $test_name in
@@ -114,8 +114,8 @@ collect_test_results() {
     
     # Count alerts generated
     local alert_count=0
-    if docker exec ids test -f /var/log/suricata/fast.log; then
-        alert_count=$(docker exec ids wc -l /var/log/suricata/fast.log | cut -d' ' -f1)
+    if docker exec ids test -f /var/log/snort/alerts.txt; then
+        alert_count=$(docker exec ids wc -l /var/log/snort/alerts.txt | cut -d' ' -f1)
     fi
     
     # Get CPU and memory usage
@@ -137,7 +137,7 @@ EOF
     
     # Save detailed logs if available
     if [ $alert_count -gt 0 ]; then
-        docker exec ids cat /var/log/suricata/fast.log > "$RESULTS_DIR/${test_name}_alerts_${TIMESTAMP}.log" 2>/dev/null || true
+        docker exec ids cat /var/log/snort/alerts.txt > "$RESULTS_DIR/${test_name}_alerts_${TIMESTAMP}.log" 2>/dev/null || true
     fi
     
     echo "📝 Results: $alert_count alerts, ${cpu_usage}% CPU, Duration: ${duration}s"

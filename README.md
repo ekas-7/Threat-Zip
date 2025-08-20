@@ -1,14 +1,14 @@
-# 🛠️ IDS Lab: Evaluation of Open Source Intrusion Detection Systems using Docker
+# 🛠️ IDS Lab: Evaluation of Snort Intrusion Detection System using Docker
 
-A comprehensive Docker-based laboratory environment for evaluating and comparing different Intrusion Detection Systems (IDS) including Suricata and Snort.
+A comprehensive Docker-based laboratory environment for evaluating the Snort Intrusion Detection System through systematic attack simulations.
 
 ## 🎯 Lab Overview
 
-This lab provides a controlled environment to test and evaluate IDS capabilities through systematic attack simulations. The environment includes:
+This lab provides a controlled environment to test and evaluate Snort IDS capabilities through systematic attack simulations. The environment includes:
 
 - **Attacker Container**: Kali Linux with penetration testing tools
 - **Victim Container**: DVWA (Damn Vulnerable Web Application) 
-- **IDS Containers**: Suricata (default) and Snort (alternative)
+- **IDS Container**: Snort with custom detection rules
 - **Monitoring Stack**: Grafana + Loki + Promtail for log visualization
 
 ## 🏗️ Architecture
@@ -16,8 +16,8 @@ This lab provides a controlled environment to test and evaluate IDS capabilities
 ```
 ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
 │   Attacker  │────│   Victim    │    │     IDS     │
-│ (Kali Linux)│    │   (DVWA)    │    │ (Suricata/  │
-│             │    │             │    │  Snort)     │
+│ (Kali Linux)│    │   (DVWA)    │    │   (Snort)   │
+│             │    │             │    │             │
 └─────────────┘    └─────────────┘    └─────────────┘
        │                   │                   │
        └───────────────────┼───────────────────┘
@@ -45,11 +45,8 @@ cd Threat-Zip
 
 ### 2. Start the Lab
 ```bash
-# Basic lab with Suricata
+# Basic lab with Snort
 ./lab.sh start
-
-# Or with Snort IDS
-./lab.sh start-snort
 
 # Or full lab with monitoring
 ./lab.sh start-full
@@ -100,8 +97,7 @@ The lab includes the following attack scenarios:
 ## 🔧 Configuration
 
 ### IDS Rules
-- **Suricata**: `suricata/rules/custom.rules`
-- **Snort**: `snort/rules/lab.rules`
+- **Snort**: `snort/rules/lab.rules` and `snort/rules/local.rules`
 
 ### Network Configuration
 - **Lab Network**: 172.20.0.0/16
@@ -110,8 +106,7 @@ The lab includes the following attack scenarios:
 - **IDS**: 172.20.0.30
 
 ### Log Locations
-- **Suricata**: `logs/eve.json`, `logs/fast.log`
-- **Snort**: `logs/snort.log`, `logs/alerts.txt`
+- **Snort**: `logs/alerts.txt`, `logs/snort.log`
 
 ## 📊 Evaluation Framework
 
@@ -148,8 +143,7 @@ The lab includes the following attack scenarios:
 
 ### Available Commands
 ```bash
-./lab.sh start         # Start basic lab
-./lab.sh start-snort   # Start with Snort IDS
+./lab.sh start         # Start Snort IDS lab
 ./lab.sh start-full    # Start with monitoring
 ./lab.sh stop          # Stop lab
 ./lab.sh restart       # Restart lab
@@ -171,14 +165,11 @@ The lab includes the following attack scenarios:
 
 ### Direct Log Analysis
 ```bash
-# View Suricata alerts
-tail -f logs/eve.json | jq 'select(.event_type=="alert")'
-
-# View Snort alerts  
-tail -f logs/fast.log
+# View Snort alerts
+tail -f logs/alerts.txt
 
 # Search for specific attacks
-grep "ICMP Flood" logs/fast.log
+grep "ICMP Flood" logs/alerts.txt
 ```
 
 ## 📈 Extensions and Customization
@@ -190,19 +181,12 @@ grep "ICMP Flood" logs/fast.log
 
 ### Custom IDS Rules
 ```bash
-# Suricata
-echo 'alert tcp any any -> any 80 (msg:"Custom Rule"; sid:2000001;)' >> suricata/rules/custom.rules
-
-# Snort
+# Add custom Snort rules
 echo 'alert tcp any any -> any 80 (msg:"Custom Rule"; sid:2000001;)' >> snort/rules/local.rules
 ```
 
 ### Multiple IDS Comparison
-```bash
-# Run both Suricata and Snort
-docker-compose up -d ids
-docker-compose --profile snort up -d snort-ids
-```
+This lab is focused on Snort evaluation. For multi-IDS comparison, consider setting up separate environments.
 
 ## 🔧 Troubleshooting
 
@@ -256,9 +240,10 @@ This lab is suitable for:
 - Rule effectiveness analysis
 
 ### Comparative Analysis
-- Suricata vs Snort performance
+- Performance under different attack loads
 - Different rule sets effectiveness
 - Impact of configuration changes
+- Resource usage optimization
 
 ## 🤝 Contributing
 
@@ -278,10 +263,10 @@ This lab is for educational and research purposes only. The included attack tool
 
 ## 🔗 Resources
 
-- [Suricata Documentation](https://suricata.readthedocs.io/)
 - [Snort Documentation](https://www.snort.org/documents)
 - [DVWA Documentation](http://www.dvwa.co.uk/)
 - [Docker Compose Reference](https://docs.docker.com/compose/)
+- [Snort Rules Writing Guide](https://docs.snort.org/rules)
 
 ---
 

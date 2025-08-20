@@ -51,29 +51,10 @@ services:
         ipv4_address: 172.20.0.21
 
   ids:
-    image: jasonish/suricata:latest
-    container_name: ids
-    command: suricata -i eth0 -v
-    volumes:
-      - ./suricata/rules:/var/lib/suricata/rules
-      - ./suricata/config:/etc/suricata
-      - ./logs:/var/log/suricata
-    networks:
-      labnet:
-        ipv4_address: 172.20.0.30
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-      - SYS_NICE
-    depends_on:
-      - victim
-
-  # Alternative Snort IDS (comment out suricata above if using this)
-  snort-ids:
     build:
       context: ./snort
       dockerfile: Dockerfile
-    container_name: snort-ids
+    container_name: ids
     command: snort -i eth0 -A console -c /etc/snort/snort.conf -l /var/log/snort
     volumes:
       - ./snort/rules:/etc/snort/rules
@@ -81,12 +62,12 @@ services:
       - ./logs:/var/log/snort
     networks:
       labnet:
-        ipv4_address: 172.20.0.31
+        ipv4_address: 172.20.0.30
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    profiles:
-      - snort  # Use with: docker-compose --profile snort up
+    depends_on:
+      - victim
 
   # Log Analysis and Visualization
   grafana:
@@ -124,7 +105,7 @@ services:
     image: grafana/promtail:latest
     container_name: promtail
     volumes:
-      - ./logs:/var/log/suricata:ro
+      - ./logs:/var/log/snort:ro
       - ./promtail/config.yml:/etc/promtail/config.yml
     command: -config.file=/etc/promtail/config.yml
     networks:

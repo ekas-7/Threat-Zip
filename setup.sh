@@ -24,8 +24,6 @@ echo "✅ Docker and Docker Compose are installed"
 # Create necessary directories if they don't exist
 echo "📁 Creating necessary directories..."
 mkdir -p logs
-mkdir -p suricata/rules
-mkdir -p suricata/config
 mkdir -p snort/rules
 mkdir -p snort/config
 
@@ -43,16 +41,10 @@ echo "✅ Setup completed!"
 echo ""
 echo "📋 Available lab configurations:"
 echo ""
-echo "1. Basic IDS Lab (Suricata):"
+echo "1. Basic IDS Lab (Snort):"
 echo "   docker-compose up -d"
 echo ""
-echo "2. Snort IDS Lab:"
-echo "   docker-compose --profile snort up -d"
-echo ""
-echo "3. Full Lab with Monitoring:"
-echo "   docker-compose --profile monitoring up -d"
-echo ""
-echo "4. Everything (Suricata + Monitoring):"
+echo "2. Full Lab with Monitoring:"
 echo "   docker-compose --profile monitoring up -d"
 echo ""
 echo "📚 Usage:"

@@ -8,8 +8,8 @@ show_help() {
     echo "Usage: $0 [COMMAND]"
     echo ""
     echo "Commands:"
-    echo "  start         Start the basic IDS lab"
-    echo "  start-snort   Start the lab with Snort IDS"
+    echo "  start         Start the IDS lab with Snort"
+    echo "  start-snort   Start the lab (same as start)"
     echo "  start-full    Start the full lab with monitoring"
     echo "  stop          Stop the lab"
     echo "  restart       Restart the lab"
@@ -24,15 +24,15 @@ show_help() {
 }
 
 start_basic() {
-    echo "🚀 Starting basic IDS lab with Suricata..."
+    echo "🚀 Starting IDS lab with Snort..."
     docker-compose up -d attacker victim db ids
     echo "✅ Lab started!"
     show_access_info
 }
 
 start_snort() {
-    echo "🚀 Starting IDS lab with Snort..."
-    docker-compose --profile snort up -d attacker victim db snort-ids
+    echo "🚀 Starting IDS lab with Snort (alternative config)..."
+    docker-compose up -d attacker victim db ids
     echo "✅ Lab started with Snort!"
     show_access_info
 }
@@ -61,8 +61,6 @@ show_logs() {
     echo "📋 Showing IDS logs..."
     if docker ps | grep -q "ids"; then
         docker logs -f ids
-    elif docker ps | grep -q "snort-ids"; then
-        docker logs -f snort-ids
     else
         echo "❌ No IDS container running"
     fi
@@ -91,10 +89,11 @@ clean_lab() {
 
 monitor_alerts() {
     echo "🔍 Monitoring IDS alerts..."
-    if [ -f "logs/fast.log" ]; then
-        tail -f logs/fast.log
-    elif [ -f "logs/eve.json" ]; then
-        tail -f logs/eve.json | jq 'select(.event_type=="alert")'
+    if [ -f "logs/alerts.txt" ]; then
+        tail -f logs/alerts.txt
+    elif [ -f "logs/snort.log" ]; then
+        echo "Monitoring binary log file. Use 'docker logs -f ids' for real-time alerts."
+        docker logs -f ids
     else
         echo "❌ No log files found. Make sure the lab is running."
     fi
