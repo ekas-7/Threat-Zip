@@ -55,7 +55,7 @@ services:
       context: ./snort
       dockerfile: Dockerfile
     container_name: ids
-    command: snort -i eth0 -A console -c /etc/snort/snort.conf -l /var/log/snort
+    command: snort -i eth0 -A fast -c /etc/snort/snort.conf -l /var/log/snort -K ascii
     volumes:
       - ./snort/rules:/etc/snort/rules
       - ./snort/config:/etc/snort

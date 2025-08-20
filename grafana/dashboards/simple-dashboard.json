@@ -1,0 +1,190 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "IDS Lab - Simple Log Monitor",
+    "tags": ["ids", "snort", "logs"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "5s",
+    "time": {
+      "from": "now-30m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Live Snort Logs",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"snort\"}",
+            "refId": "A",
+            "datasource": {
+              "type": "loki",
+              "uid": "loki"
+            }
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": false,
+          "showCommonLabels": false,
+          "wrapLogMessage": false,
+          "prettifyLogMessage": false,
+          "enableLogDetails": true,
+          "dedupStrategy": "none",
+          "sortOrder": "Descending"
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Log Volume Over Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate({job=\"snort\"}[1m])",
+            "refId": "A",
+            "datasource": {
+              "type": "loki",
+              "uid": "loki"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "linear",
+              "barAlignment": 0,
+              "lineWidth": 2,
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "spanNulls": false,
+              "insertNulls": false,
+              "showPoints": "auto",
+              "pointSize": 5
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 12
+        }
+      },
+      {
+        "id": 3,
+        "title": "Snort Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "count({job=\"snort\"})",
+            "refId": "A",
+            "datasource": {
+              "type": "loki",
+              "uid": "loki"
+            }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "NO DATA"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 0,
+          "y": 20
+        }
+      },
+      {
+        "id": 4,
+        "title": "Lab Instructions",
+        "type": "text",
+        "options": {
+          "content": "## IDS Lab Dashboard\n\n**To see data in this dashboard:**\n\n1. Run attacks from the attacker container:\n   ```\n   docker exec -it attacker bash\n   /scripts/attack_menu.sh\n   ```\n\n2. Monitor Snort logs:\n   ```\n   docker logs -f ids\n   ```\n\n3. Check log files:\n   ```\n   ls -la logs/\n   ```\n\n**Available Attacks:**\n- ICMP Flood\n- SYN Flood \n- HTTP Flood\n- Port Scanning\n- Web Application Attacks\n\n**Snort Configuration:**\n- Rules: `/snort/rules/`\n- Config: `/snort/config/`\n- Logs: `/logs/`",
+          "mode": "markdown"
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 16,
+          "x": 8,
+          "y": 20
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "links": [],
+    "liveNow": false,
+    "schemaVersion": 27,
+    "version": 0,
+    "weekStart": ""
+  },
+  "meta": {
+    "type": "db",
+    "canSave": true,
+    "canEdit": true,
+    "canAdmin": true,
+    "canStar": true,
+    "slug": "ids-lab-simple-log-monitor",
+    "url": "/d/ids-simple/ids-lab-simple-log-monitor",
+    "expires": "0001-01-01T00:00:00Z",
+    "created": "2025-08-20T12:00:00Z",
+    "updated": "2025-08-20T12:00:00Z",
+    "updatedBy": "admin",
+    "createdBy": "admin",
+    "version": 1,
+    "hasAcl": false,
+    "isFolder": false,
+    "folderId": 0,
+    "folderTitle": "General",
+    "folderUrl": "",
+    "provisioned": true,
+    "provisionedExternalId": "simple-dashboard.json"
+  }
+}
