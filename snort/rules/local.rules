@@ -1,0 +1,4 @@
+# Local custom rules - add your own rules here
+
+# Example local rule
+# alert tcp any any -> any any (msg:"Local Test Rule"; content:"test"; sid:1000999; rev:1;)

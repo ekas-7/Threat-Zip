@@ -1,0 +1,138 @@
+version: '3.8'
+
+networks:
+  labnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+services:
+  attacker:
+    image: kalilinux/kali-rolling
+    container_name: attacker
+    command: tail -f /dev/null   # keep container running
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.10
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./scripts:/scripts
+    depends_on:
+      - victim
+
+  victim:
+    image: vulnerables/web-dvwa
+    container_name: victim
+    ports:
+      - "8080:80"   # access web app on localhost:8080
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.20
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+      - MYSQL_DATABASE=dvwa
+      - RECAPTCHA_PRIV_KEY=""
+      - RECAPTCHA_PUB_KEY=""
+
+  db:
+    image: mariadb:10.1
+    container_name: victim-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=dvwa
+      - MYSQL_DATABASE=dvwa
+      - MYSQL_USER=dvwa
+      - MYSQL_PASSWORD=p@ssw0rd
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.21
+
+  ids:
+    image: jasonish/suricata:latest
+    container_name: ids
+    command: suricata -i eth0 -v
+    volumes:
+      - ./suricata/rules:/var/lib/suricata/rules
+      - ./suricata/config:/etc/suricata
+      - ./logs:/var/log/suricata
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.30
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_NICE
+    depends_on:
+      - victim
+
+  # Alternative Snort IDS (comment out suricata above if using this)
+  snort-ids:
+    build:
+      context: ./snort
+      dockerfile: Dockerfile
+    container_name: snort-ids
+    command: snort -i eth0 -A console -c /etc/snort/snort.conf -l /var/log/snort
+    volumes:
+      - ./snort/rules:/etc/snort/rules
+      - ./snort/config:/etc/snort
+      - ./logs:/var/log/snort
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.31
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    profiles:
+      - snort  # Use with: docker-compose --profile snort up
+
+  # Log Analysis and Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.40
+    profiles:
+      - monitoring
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.41
+    profiles:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./logs:/var/log/suricata:ro
+      - ./promtail/config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      labnet:
+        ipv4_address: 172.20.0.42
+    profiles:
+      - monitoring
+
+volumes:
+  grafana-data:
+  loki-data:

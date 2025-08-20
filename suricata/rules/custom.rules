@@ -1,0 +1,45 @@
+# Custom Suricata rules for lab testing
+
+# ICMP Flood Detection
+alert icmp any any -> any any (msg:"ICMP Flood Detected"; threshold: type both, track by_src, count 10, seconds 5; sid:1000001; rev:1;)
+
+# TCP SYN Flood Detection
+alert tcp any any -> any any (msg:"TCP SYN Flood Detected"; flags:S,!A; threshold: type both, track by_src, count 20, seconds 5; sid:1000002; rev:1;)
+
+# HTTP Flood Detection
+alert http any any -> any any (msg:"HTTP Flood Detected"; threshold: type both, track by_src, count 50, seconds 10; sid:1000003; rev:1;)
+
+# Port Scanning Detection
+alert tcp any any -> any any (msg:"Port Scan Detected"; flags:S,!A; threshold: type threshold, track by_src, count 10, seconds 5; sid:1000004; rev:1;)
+
+# Suspicious User Agents
+alert http any any -> any any (msg:"Suspicious User Agent - hping"; content:"User-Agent|3a| hping"; http_header; sid:1000005; rev:1;)
+
+# SQL Injection Attempts
+alert http any any -> any any (msg:"SQL Injection Attempt"; content:"union"; nocase; http_uri; sid:1000006; rev:1;)
+alert http any any -> any any (msg:"SQL Injection Attempt - SELECT"; content:"select"; nocase; http_uri; sid:1000007; rev:1;)
+
+# XSS Attempts
+alert http any any -> any any (msg:"XSS Attempt - Script Tag"; content:"<script"; nocase; http_uri; sid:1000008; rev:1;)
+
+# Directory Traversal
+alert http any any -> any any (msg:"Directory Traversal Attempt"; content:"../"; http_uri; sid:1000009; rev:1;)
+
+# Large HTTP Requests (potential DoS)
+alert http any any -> any any (msg:"Large HTTP Request"; dsize:>8192; sid:1000010; rev:1;)
+
+# Suspicious POST requests
+alert http any any -> any any (msg:"Suspicious POST to login"; content:"POST"; http_method; content:"/login"; http_uri; sid:1000011; rev:1;)
+
+# Multiple failed login attempts (common in DVWA)
+alert http any any -> any any (msg:"Multiple Login Attempts"; content:"POST"; http_method; content:"login.php"; http_uri; threshold: type both, track by_src, count 5, seconds 60; sid:1000012; rev:1;)
+
+# Nmap Detection
+alert tcp any any -> any any (msg:"Nmap TCP Connect Scan"; flags:S,12; ack:0; sid:1000013; rev:1;)
+alert tcp any any -> any any (msg:"Nmap SYN Scan"; flags:S,!12; ack:0; sid:1000014; rev:1;)
+
+# Hydra Brute Force Detection
+alert tcp any any -> any 80 (msg:"Hydra HTTP Brute Force"; content:"hydra"; http_user_agent; sid:1000015; rev:1;)
+
+# Nikto Web Scanner Detection
+alert tcp any any -> any 80 (msg:"Nikto Web Scanner"; content:"Nikto"; http_user_agent; sid:1000016; rev:1;)

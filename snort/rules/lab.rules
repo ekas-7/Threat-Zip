@@ -1,0 +1,28 @@
+# Lab-specific Snort rules
+
+# ICMP Flood Detection
+alert icmp $EXTERNAL_NET any -> $HOME_NET any (msg:"ICMP Flood Attack"; threshold: type both, track by_src, count 10, seconds 5; sid:1000001; rev:1;)
+
+# TCP SYN Flood Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"TCP SYN Flood Attack"; flags:S,!A; threshold: type both, track by_src, count 20, seconds 5; sid:1000002; rev:1;)
+
+# HTTP Flood Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"HTTP Flood Attack"; threshold: type both, track by_src, count 50, seconds 10; sid:1000003; rev:1;)
+
+# Port Scanning Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Port Scan Detected"; flags:S,!A; threshold: type threshold, track by_src, count 10, seconds 5; sid:1000004; rev:1;)
+
+# Nmap Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap TCP Connect Scan"; flags:S; ack:0; sid:1000005; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any (msg:"Nmap SYN Scan"; flags:S,!12; ack:0; sid:1000006; rev:1;)
+
+# Web Application Attacks
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"SQL Injection Attempt"; content:"union"; nocase; sid:1000007; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"XSS Attempt"; content:"<script"; nocase; sid:1000008; rev:1;)
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"Directory Traversal"; content:"../"; sid:1000009; rev:1;)
+
+# Large Request Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"Large HTTP Request"; dsize:>8192; sid:1000010; rev:1;)
+
+# Brute Force Detection
+alert tcp $EXTERNAL_NET any -> $HOME_NET $HTTP_PORTS (msg:"HTTP Brute Force"; content:"POST"; nocase; content:"login"; nocase; threshold: type both, track by_src, count 5, seconds 60; sid:1000011; rev:1;)
