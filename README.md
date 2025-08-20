@@ -1,4 +1,5 @@
 # 🛠️ IDS Lab: Evaluation of Snort Intrusion Detection System using Docker
+<img width="2048" height="2048" alt="Gemini_Generated_Image_yocl7ayocl7ayocl" src="https://github.com/user-attachments/assets/92842535-8f3a-4552-9cd9-53dfb954891e" />
 
 A comprehensive Docker-based laboratory environment for evaluating the Snort Intrusion Detection System through systematic attack simulations.
 
